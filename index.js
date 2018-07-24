@@ -1,9 +1,7 @@
 let startLightClientFromGenesis = require('./lib/connect-by-address-from-genesis.js')
 let GetState = require('./lib/get-state.js')
 let SendTx = require('./lib/send-tx.js')
-let getPeerGCI = require('./lib/gci-get-peer.js')
 let Proxmise = require('proxmise')
-let jpfs = require('jpfs')
 let { parse, stringify } = require('deterministic-json')
 
 function connect(GCI, opts = {}) {
@@ -11,23 +9,11 @@ function connect(GCI, opts = {}) {
     let nodes = opts.nodes || []
     let genesis = opts.genesis
 
-    if (!genesis) {
-      let rawGenesis = await jpfs.get(GCI)
-      try {
-        genesis = parse(rawGenesis)
-      } catch (e) {
-        throw new Error('invalid GCI')
-      }
-    }
-
     let nodeAddress
     if (nodes.length) {
       // randomly sample from supplied seed nodes
       let randomIndex = Math.floor(Math.random() * nodes.length)
       nodeAddress = nodes[randomIndex]
-    } else {
-      // gci discovery magic...
-      nodeAddress = await getPeerGCI(GCI)
     }
 
     let lc = await startLightClientFromGenesis(genesis, nodeAddress)
