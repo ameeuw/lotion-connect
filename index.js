@@ -14,6 +14,9 @@ function connect(GCI, opts = {}) {
       // randomly sample from supplied seed nodes
       let randomIndex = Math.floor(Math.random() * nodes.length)
       nodeAddress = nodes[randomIndex]
+    } else {
+      // gci discovery magic...
+      nodeAddress = await getPeerGCI(GCI)
     }
 
     let lc = await startLightClientFromGenesis(genesis, nodeAddress)
