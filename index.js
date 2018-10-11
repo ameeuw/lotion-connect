@@ -3,6 +3,7 @@ let GetState = require('./lib/get-state.js')
 let SendTx = require('./lib/send-tx.js')
 let Proxmise = require('proxmise')
 let { parse, stringify } = require('deterministic-json')
+var EventEmitter = require('events');
 
 function connect(GCI, opts = {}) {
   return new Promise(async (resolve, reject) => {
@@ -14,16 +15,16 @@ function connect(GCI, opts = {}) {
       // randomly sample from supplied seed nodes
       let randomIndex = Math.floor(Math.random() * nodes.length)
       nodeAddress = nodes[randomIndex]
-    } else {
-      // gci discovery magic...
-      nodeAddress = await getPeerGCI(GCI)
     }
 
     let lc = await startLightClientFromGenesis(genesis, nodeAddress)
+    let bus = new EventEmitter()
+    lc.on('error', e => bus.emit('error', e))
     let getState = GetState(lc)
     let sendTx = SendTx(lc)
     resolve({
       getState,
+      bus,
       send: sendTx,
       state: Proxmise(async path => {
         return await getState(path.join('.'))
