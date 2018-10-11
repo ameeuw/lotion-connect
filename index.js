@@ -22,6 +22,7 @@ function connect(GCI, opts = {}) {
     lc.on('error', e => bus.emit('error', e))
     let getState = GetState(lc)
     let sendTx = SendTx(lc)
+    await delay()
     resolve({
       getState,
       bus,
@@ -30,6 +31,12 @@ function connect(GCI, opts = {}) {
         return await getState(path.join('.'))
       })
     })
+  })
+}
+
+function delay(ms = 1000) {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, ms)
   })
 }
 
